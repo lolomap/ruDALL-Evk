@@ -1,1 +1,1 @@
-FloppaBot: python main.py
+ruDALL-Evk: python main.py
