@@ -49,7 +49,7 @@ async def process_message(session, event, chat_id):
                 img_p = requests.get(url)
                 if 'src="https://img.rudalle.ru/images' in str(img_p.text):
                     is_ready = False
-                time.sleep(30)
+                time.sleep(10)
             idd = str(img_p.content).find('src="https://img.rudalle.ru/images')
             img_url = str(img_p.content)[idd + 5:].split('"')[0]
             print(img_url)
@@ -59,6 +59,32 @@ async def process_message(session, event, chat_id):
         VkApi.send_message('Ошибка. Возможно вы неправильно ввели капчу', session, event)
 
 
+def main():
+    try:
+        loop = asyncio.get_event_loop()
+        loop.run_forever()
+        print('Bot started')
+        vk = VkApi.create_session()
+        session = vk['session']
+        longpoll = vk['longpoll']
+        for event in longpoll.listen():
+            try:
+                if VkApi.is_event_message(event.type):
+                    chat_ide = event.obj.message['peer_id']
+                    asyncio.ensure_future(process_message(session, event, chat_ide))
+                    # coroutin = process_message(session, event, chat_ide)
+                    # coroutin.send(None)
+            except StopIteration:
+                continue
+    except:
+        return
+
+
+if __name__ == '__main__':
+    main()
+
+
+'''
 async def main():
     try:
         print('Bot started')
@@ -85,3 +111,4 @@ if __name__ == '__main__':
             loop.run_forever()
         except:
             continue
+'''
