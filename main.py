@@ -69,9 +69,7 @@ def main():
             try:
                 if VkApi.is_event_message(event.type):
                     chat_ide = event.obj.message['peer_id']
-                    asyncio.run(process_message(session, event, chat_ide))
-                    #coroutin = process_message(session, event, chat_ide)
-                    #coroutin.send(None)
+                    asyncio.create_task(process_message(session, event, chat_ide))
             except StopIteration:
                 continue
     except:
