@@ -61,7 +61,6 @@ async def process_message(session, event, chat_id):
 
 
 async def main():
-	try:
 		print('Bot started')
 		vk = VkApi.create_session()
 		session = vk['session']
@@ -72,8 +71,6 @@ async def main():
 				chat_ide = event.obj.message['peer_id']
 				coroutin = process_message(session, event, chat_ide)
 				coroutin.send(None)
-	except:
-		pass
 
 
 if __name__ == '__main__':
