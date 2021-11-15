@@ -61,15 +61,20 @@ async def process_message(session, event, chat_id):
 
 
 async def main():
-	print('Bot started')
-	vk = VkApi.create_session()
-	session = vk['session']
-	longpoll = vk['longpoll']
-	for event in longpoll.listen():
-		if VkApi.is_event_message(event.type):
-			#print('Message catched')
-			chat_ide = event.obj.message['peer_id']
-			await process_message(session, event, chat_ide)
+	try:
+		print('Bot started')
+		vk = VkApi.create_session()
+		session = vk['session']
+		longpoll = vk['longpoll']
+		for event in longpoll.listen():
+			if VkApi.is_event_message(event.type):
+				#print('Message catched')
+				chat_ide = event.obj.message['peer_id']
+				coroutin = process_message(session, event, chat_ide)
+				coroutin.send(None)
+	except:
+		pass
+
 
 if __name__ == '__main__':
 	while True:
