@@ -59,7 +59,7 @@ async def process_message(session, event, chat_id):
         VkApi.send_message('Ошибка. Возможно вы неправильно ввели капчу', session, event)
 
 
-def main():
+async def main():
     try:
         print('Bot started')
         vk = VkApi.create_session()
@@ -69,7 +69,7 @@ def main():
             try:
                 if VkApi.is_event_message(event.type):
                     chat_ide = event.obj.message['peer_id']
-                    asyncio.create_task(process_message(session, event, chat_ide))
+                    await asyncio.create_task(process_message(session, event, chat_ide))
             except StopIteration:
                 continue
     except:
@@ -79,6 +79,6 @@ def main():
 if __name__ == '__main__':
     while True:
         try:
-            main()
+            asyncio.run(main())
         except:
             continue
