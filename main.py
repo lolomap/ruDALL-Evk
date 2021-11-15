@@ -61,8 +61,6 @@ async def process_message(session, event, chat_id):
 
 def main():
     try:
-        loop = asyncio.get_event_loop()
-        loop.run_forever()
         print('Bot started')
         vk = VkApi.create_session()
         session = vk['session']
@@ -71,32 +69,9 @@ def main():
             try:
                 if VkApi.is_event_message(event.type):
                     chat_ide = event.obj.message['peer_id']
-                    asyncio.ensure_future(process_message(session, event, chat_ide))
-                    # coroutin = process_message(session, event, chat_ide)
-                    # coroutin.send(None)
-            except StopIteration:
-                continue
-    except:
-        return
-
-
-if __name__ == '__main__':
-    main()
-
-
-'''
-async def main():
-    try:
-        print('Bot started')
-        vk = VkApi.create_session()
-        session = vk['session']
-        longpoll = vk['longpoll']
-        for event in longpoll.listen():
-            try:
-                if VkApi.is_event_message(event.type):
-                    chat_ide = event.obj.message['peer_id']
-                    coroutin = process_message(session, event, chat_ide)
-                    coroutin.send(None)
+                    asyncio.run(process_message(session, event, chat_ide))
+                    #coroutin = process_message(session, event, chat_ide)
+                    #coroutin.send(None)
             except StopIteration:
                 continue
     except:
@@ -106,9 +81,6 @@ async def main():
 if __name__ == '__main__':
     while True:
         try:
-            loop = asyncio.get_event_loop()
-            asyncio.ensure_future(main())
-            loop.run_forever()
+            main()
         except:
             continue
-'''
