@@ -1,11 +1,21 @@
 # -*- coding: utf-8 -*-
 import asyncio
-
+from threading import Thread
 import requests
 import VkApi
 import time
 
 chats_info = {}
+
+
+class AsyncLoopThread(Thread):
+    def __init__(self):
+        super().__init__(daemon=True)
+        self.loop = asyncio.new_event_loop()
+
+    def run(self):
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_forever()
 
 
 def get_request(text):
@@ -24,7 +34,6 @@ def send_request(text, captcha_url, captcha_inp, csrftoken, cookies):
                             cookies=cookies,
                             data={'text': text, 'captcha_0': captcha_url, 'captcha_1': captcha_inp,
                                   'csrfmiddlewaretoken': csrftoken})
-    print(respond.status_code)
     image_url = 'https://rudalle.ru/check_image/' + \
                 respond.text.split('<a href="/check_image/')[1].split('"')[0]
     return image_url
@@ -36,25 +45,27 @@ async def process_message(session, event, chat_id):
         if 'пикча ' in msg_text:
             text = msg_text.split('пикча ')[1]
             r = get_request(text)
-            chats_info[chat_id] = r
+            if chat_id not in chats_info.keys():
+                chats_info[chat_id] = []
+            chats_info[chat_id].append(r)
             photo = VkApi.get_photo_to_send(r['captcha_url'], session, event)
             VkApi.send_message_photo('Отправьте captcha [ТЕКСТ С КАПЧИ]', photo, session, event)
         elif 'captcha ' in msg_text:
             text = msg_text.split('captcha ')[1].upper()
-            url = send_request(chats_info[chat_id]['text'], chats_info[chat_id]['captcha_url'].split('/')[-1], text,
-                               chats_info[chat_id]['csrf'], chats_info[chat_id]['cookies'])
+            url = send_request(chats_info[chat_id][-1]['text'], chats_info[chat_id][-1]['captcha_url'].split('/')[-1],
+                               text, chats_info[chat_id][-1]['csrf'], chats_info[chat_id][-1]['cookies'])
             VkApi.send_message('Пикча генерируется...', session, event)
             is_ready = True
             while is_ready:
                 img_p = requests.get(url)
                 if 'src="https://img.rudalle.ru/images' in str(img_p.text):
                     is_ready = False
-                time.sleep(10)
+                await asyncio.sleep(10)
             idd = str(img_p.content).find('src="https://img.rudalle.ru/images')
             img_url = str(img_p.content)[idd + 5:].split('"')[0]
-            print(img_url)
             photo = VkApi.get_photo_to_send(img_url, session, event)
-            VkApi.send_message_photo('Пикча по запросу ' + chats_info[chat_id]['text'], photo, session, event)
+            VkApi.send_message_photo('Пикча по запросу ' + chats_info[chat_id][0]['text'], photo, session, event)
+            chats_info[chat_id].pop(0)
     except:
         VkApi.send_message('Ошибка. Возможно вы неправильно ввели капчу', session, event)
 
@@ -63,15 +74,19 @@ async def main():
     try:
         print('Bot started')
         vk = VkApi.create_session()
+        looph = AsyncLoopThread()
+        looph.start()
         session = vk['session']
         longpoll = vk['longpoll']
+
         for event in longpoll.listen():
-            try:
-                if VkApi.is_event_message(event.type):
-                    chat_ide = event.obj.message['peer_id']
-                    await asyncio.create_task(process_message(session, event, chat_ide))
-            except StopIteration:
-                continue
+            if VkApi.is_event_message(event.type):
+                chat_ide = event.obj.message['peer_id']
+
+                asyncio.run_coroutine_threadsafe(process_message(session, event, chat_ide), looph.loop)
+
+                # task = asyncio.create_task(process_message(session, event, chat_ide))
+                # await task
     except:
         return
 
@@ -80,5 +95,6 @@ if __name__ == '__main__':
     while True:
         try:
             asyncio.run(main())
-        except:
+        except Exception as e:
+            print(e)
             continue
