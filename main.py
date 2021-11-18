@@ -6,6 +6,7 @@ import VkApi
 import time
 
 chats_info = {}
+alphabet = 'abcdefghijklmnopqrstuvwxyz'
 
 
 class AsyncLoopThread(Thread):
@@ -42,16 +43,19 @@ def send_request(text, captcha_url, captcha_inp, csrftoken, cookies):
 async def process_message(session, event, chat_id):
     try:
         msg_text = event.obj.message['text'].lower()
-        if 'пикча ' in msg_text:
-            text = msg_text.split('пикча ')[1]
+        if 'пикча ' in msg_text or 'рд ' in msg_text:
+            if 'пикча ' in msg_text:
+                text = msg_text.split('пикча ')[1]
+            else:
+                text = msg_text.split('рд ')[1]
             r = get_request(text)
             if chat_id not in chats_info.keys():
                 chats_info[chat_id] = []
             chats_info[chat_id].append(r)
             photo = VkApi.get_photo_to_send(r['captcha_url'], session, event)
-            VkApi.send_message_photo('Отправьте captcha [ТЕКСТ С КАПЧИ]', photo, session, event)
-        elif 'captcha ' in msg_text:
-            text = msg_text.split('captcha ')[1].upper()
+            VkApi.send_message_photo('Отправьте текст капчи', photo, session, event)
+        elif len(msg_text) == 4 and all(letter in alphabet for letter in msg_text):
+            text = msg_text.upper()
             url = send_request(chats_info[chat_id][-1]['text'], chats_info[chat_id][-1]['captcha_url'].split('/')[-1],
                                text, chats_info[chat_id][-1]['csrf'], chats_info[chat_id][-1]['cookies'])
             VkApi.send_message('Пикча генерируется...', session, event)
@@ -66,8 +70,12 @@ async def process_message(session, event, chat_id):
             photo = VkApi.get_photo_to_send(img_url, session, event)
             VkApi.send_message_photo('Пикча по запросу ' + chats_info[chat_id][0]['text'], photo, session, event)
             chats_info[chat_id].pop(0)
-    except:
-        VkApi.send_message('Ошибка. Возможно вы неправильно ввели капчу', session, event)
+        elif msg_text == '!сброс':
+            del chats_info[chat_id][:]
+            VkApi.send_message('Сброс бота', session, event)
+    except Exception as ep:
+        VkApi.send_message('Ошибка обработки. Возможно вы неправильно ввели капчу', session, event)
+        print(ep)
 
 
 async def main():
@@ -85,8 +93,6 @@ async def main():
 
                 asyncio.run_coroutine_threadsafe(process_message(session, event, chat_ide), looph.loop)
 
-                # task = asyncio.create_task(process_message(session, event, chat_ide))
-                # await task
     except:
         return
 
