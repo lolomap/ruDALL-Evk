@@ -43,11 +43,11 @@ def send_request(text, captcha_url, captcha_inp, csrftoken, cookies):
 async def process_message(session, event, chat_id):
     try:
         msg_text = event.obj.message['text'].lower()
-        if 'пикча ' in msg_text or 'рд ' in msg_text:
+        if 'пикча ' in msg_text or 'rd ' in msg_text:
             if 'пикча ' in msg_text:
                 text = msg_text.split('пикча ')[1]
             else:
-                text = msg_text.split('рд ')[1]
+                text = msg_text.split('rd ')[1]
             r = get_request(text)
             if chat_id not in chats_info.keys():
                 chats_info[chat_id] = []
