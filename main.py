@@ -42,8 +42,6 @@ def send_request(text, captcha_url, captcha_inp, csrftoken, cookies):
 
 async def process_message(session, event, chat_id, user_id):
     try:
-        if user_id == 281646826:
-            VkApi.send_message('ИДИ НАХЕР', session, event)
         
         msg_text = event.obj.message['text'].lower()
         if 'пикча ' in msg_text or 'rd ' in msg_text:
