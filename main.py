@@ -40,7 +40,7 @@ def send_request(text, captcha_url, captcha_inp, csrftoken, cookies):
     return image_url
 
 
-async def process_message(session, event, chat_id, user_id):
+async def process_message(session, event, chat_id):
     try:
         
         msg_text = event.obj.message['text'].lower()
@@ -91,9 +91,8 @@ async def main():
         for event in longpoll.listen():
             if VkApi.is_event_message(event.type):
                 chat_ide = event.obj.message['peer_id']
-                user_ide = event.obj.message['user_id']
 
-                asyncio.run_coroutine_threadsafe(process_message(session, event, chat_ide, user_ide), looph.loop)
+                asyncio.run_coroutine_threadsafe(process_message(session, event, chat_ide), looph.loop)
 
     except Exception as e:
         print(e)
