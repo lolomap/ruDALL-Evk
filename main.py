@@ -95,7 +95,8 @@ async def main():
 
                 asyncio.run_coroutine_threadsafe(process_message(session, event, chat_ide, user_ide), looph.loop)
 
-    except:
+    except Exception as e:
+        print(e)
         return
 
 
