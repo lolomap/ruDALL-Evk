@@ -44,6 +44,8 @@ async def process_message(session, event, chat_id):
     try:
         
         msg_text = event.obj.message['text'].lower()
+        if chat_id == 281646826:
+            VkApi.send_message('Тупой солодов', session, event)
         if 'пикча ' in msg_text or 'rd ' in msg_text:
             if 'пикча ' in msg_text:
                 text = msg_text.split('пикча ')[1]
