@@ -4,6 +4,7 @@ from threading import Thread
 import requests
 import VkApi
 import time
+import random
 
 chats_info = {}
 alphabet = 'abcdefghijklmnopqrstuvwxyz'
@@ -44,8 +45,8 @@ async def process_message(session, event, chat_id):
     try:
         
         msg_text = event.obj.message['text'].lower()
-        if event.obj.message['from_id'] == 281646826:
-            VkApi.send_message('Тупой солодов', session, event)
+        if random.randint(1, 100) == 10:
+            VkApi.send_message('Тупой ' + get_user(event.obj.message['from_id'], session)['last_name'], session, event)
         if 'иид' in msg_text or 'дукс' in msg_text or 'припле' in msg_text:
             VkApi.send_message('Приплетено👍🏻', session, event)
         if 'пикча ' in msg_text:
