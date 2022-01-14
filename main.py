@@ -44,7 +44,7 @@ async def process_message(session, event, chat_id):
     try:
         
         msg_text = event.obj.message['text'].lower()
-        if chat_id == 281646826:
+        if event.obj.message['from_id'] == 281646826:
             VkApi.send_message('Тупой солодов', session, event)
         if 'иид' in msg_text or 'дукс' in msg_text or 'припле' in msg_text:
             VkApi.send_message('Приплетено👍🏻', session, event)
