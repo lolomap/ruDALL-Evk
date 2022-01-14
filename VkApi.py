@@ -41,6 +41,10 @@ def get_user_id(short_name, session):
     user = session.users.get(user_ids=short_name)[0]
     return user['id']
 
+def get_user(short_name, session):
+    user = session.users.get(user_ids=short_name)[0]
+    return user
+
 
 def send_message(msg, session, event):
     session.messages.send(peer_id=event.obj.message['peer_id'],
