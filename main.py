@@ -45,10 +45,8 @@ async def process_message(session, event, chat_id):
     try:
         
         msg_text = event.obj.message['text'].lower()
-        if random.randint(1, 100) == 10:
+        if random.randint(1, 100) == 3:
             VkApi.send_message(VkApi.get_user(event.obj.message['from_id'], session)['last_name'] + ' получает за это премию', session, event)
-        if 'иид' in msg_text or 'дукс' in msg_text or 'припле' in msg_text:
-            VkApi.send_message('Приплетено👍🏻', session, event)
         if 'пикча ' in msg_text:
             if 'пикча ' in msg_text:
                 text = msg_text.split('пикча ')[1]
